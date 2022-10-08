@@ -7,22 +7,38 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/uraldav/gqlgen-todos/graph/generated"
 	"github.com/uraldav/gqlgen-todos/graph/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
 	todo := &model.Todo{
-		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand.Int()),
-		User:   &model.User{ID: input.UserID, Name: "user " + input.UserID},
-		UserID: input.UserID,
+		Title:     input.Title,
+		Text:      input.Text,
+		ID:        fmt.Sprintf("T%d", rand.Int()),
+		User:      &model.User{ID: input.UserID, Name: "user " + input.UserID},
+		UserID:    input.UserID,
+		CreatedAt: time.Now(),
 	}
 	r.todos = append(r.todos, todo)
 
 	return todo, nil
+}
+
+// SwitchDone is the resolver for the switchDone field.
+func (r *mutationResolver) SwitchDone(ctx context.Context, id string) (*model.Todo, error) {
+	for i := range r.todos {
+		if r.todos[i].ID == id {
+			r.todos[i].Done = !r.todos[i].Done
+			return r.todos[i], nil
+		}
+	}
+
+	return nil, gqlerror.Errorf("not found")
 }
 
 // Todos is the resolver for the todos field.

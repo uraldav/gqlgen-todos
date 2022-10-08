@@ -2,11 +2,15 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Time
+
 type Todo {
   id: ID!
+  title: String!
   text: String!
   done: Boolean!
   user: User!
+  createdAt: Time!
 }
 
 type User {
@@ -19,10 +23,12 @@ type Query {
 }
 
 input NewTodo {
+  title: String!
   text: String!
   userId: String!
 }
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  switchDone(id: ID!): Todo!
 }
